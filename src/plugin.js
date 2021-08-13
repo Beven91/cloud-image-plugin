@@ -1,6 +1,7 @@
 
 const path = require('path');
 const upload = require('./util/uploader');
+const fs = require('fs');
 const StaticAppServer = require('./util/static');
 const urlParser = require('url');
 
@@ -58,13 +59,14 @@ class CloudImagePlugin {
   /**
    * 添加指定资源到清单中
    */
-  addManifest(id) {
+  addManifest(id, filePath) {
     const manifest = this.manifest;
     const meta = urlParser.parse(this.options.publicPath || '')
+    const prefix = meta.path ? meta.path + '/' : '';
     manifest[id] = {
-      file: path.join(this.compiler.options.output.path, this.getPath(id)),
+      file: filePath,
       name: id,
-      path: (meta.path + '/' + id).replace(/^\//, ''),
+      path: (prefix + id).replace(/^\//, ''),
     }
   }
 
@@ -80,25 +82,7 @@ class CloudImagePlugin {
     })
     const content = JSON.stringify(out, null, 2);
     return {
-      key: this.getPath('manifest.json'),
-      content: {
-        size: () => content.length,
-        source: () => content,
-      }
-    }
-  }
-
-  getProjectConfigAsset(assets) {
-    const asset = assets['project.config.json'];
-    let config = {};
-    if (asset) {
-      config = JSON.parse(asset.buffer().toString('utf8'));
-    }
-    config.scripts = config.scripts || {};
-    config.scripts.beforePreview = ""
-    const content = '';
-    return {
-      key: 'project.config.json',
+      key: 'manifest.json',
       content: {
         size: () => content.length,
         source: () => content,
@@ -113,19 +97,48 @@ class CloudImagePlugin {
   processAssets = (assets) => {
     const manifest = this.manifest;
     const asset = this.getManifestAsset();
-    // const pAsset = this.getProjectConfigAsset(assets);
     // 生成manifest.json
     assets[asset.key] = asset.content;
-    // 修改prect.config.json
-    // assets[pAsset.key] = pAsset.content;
+    console.log(manifest);
     // 控制云端资源输出 目录
     Object.keys(manifest).forEach((key) => {
       const asset = assets[key];
       if (asset) {
+        // 删除掉，需要上传到云端的资源文件打包输出
         delete assets[key];
-        assets[this.getPath(key)] = asset;
       }
     })
+  }
+
+  getCachePath() {
+    const nmRoot = path.resolve('node_modules');
+    const root = fs.existsSync(nmRoot) ? nmRoot : path.join(__dirname, '..');
+    const cacheRoot = path.join(root, '.cache');
+    if (!fs.existsSync(cacheRoot)) {
+      fs.mkdirSync(cacheRoot)
+    }
+    return path.join(cacheRoot, '@cloud-manifest.json');
+  }
+
+  /**
+   * 缓存manifest
+   */
+  cacheManifest() {
+    const content = JSON.stringify(this.manifest, null, 2);
+    fs.writeFileSync(this.getCachePath(), content);
+  }
+
+  getCachedManifest() {
+    try {
+      const file = this.getCachePath();
+      if (fs.existsSync(file)) {
+        return JSON.parse(fs.readFileSync(file).toString('utf-8'));
+      } else {
+        return {}
+      }
+    } catch (ex) {
+      return {}
+    }
   }
 
   apply(compiler) {
@@ -135,6 +148,7 @@ class CloudImagePlugin {
       // 启动静态资源服务
       (new StaticAppServer()).start(this)
     }
+    const idManifestPath = path.join(compiler.options.output.path, 'manifest.json')
     // 修改compiler.publicPath为对应的serverURL
     compiler.options.output.publicPath = this.serverURL;
 
@@ -143,9 +157,9 @@ class CloudImagePlugin {
         // 设置编译器引用
         this.compilation = compilation;
         // 每次重新构建，需要清空manifest
-        this.manifest = {};
+        this.manifest = this.getCachedManifest();
         // 将清单作为文件
-        this.addManifest('manifest.json')
+        this.addManifest('manifest.json', idManifestPath)
         // 生成需要上传云端的资源
         if (compilation.hooks.processAssets) {
           compilation.hooks.processAssets.tap('CloudImagePlugin', this.processAssets)
@@ -159,6 +173,7 @@ class CloudImagePlugin {
         // 如果不支持processAssets
         this.processAssets(compilation.assets);
       }
+      this.cacheManifest();
       if (this.options.mode === 'local') {
         // 本地模式，不上传内容
         return;

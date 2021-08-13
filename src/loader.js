@@ -14,7 +14,7 @@ module.exports = function (content) {
   const assets = md.buildInfo.assets || {};
   const keys = Object.keys(assets)
   const id = keys[0];
-  Plugin.addManifest(id);
+  Plugin.addManifest(id, md.resource);
   return result;
 }
 

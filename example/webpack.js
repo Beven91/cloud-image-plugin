@@ -29,6 +29,9 @@ module.exports = {
   plugins: [
     new CloudImagePlugin({
       publicPath: '',
+      uploadToCloud:(resources)=>{
+        console.log(resources)
+      }
     }),
     new webpack.ProgressPlugin(),
   ],

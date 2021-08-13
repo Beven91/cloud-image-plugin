@@ -7,6 +7,7 @@ const urlParser = require('url')
  */
 function fetchCloudManifest(url) {
   return new Promise((resolve, reject) => {
+    if (!/^(http|https)/.test(url)) return resolve({})
     const agent = /^https:/.test(url) ? https : http;
     const params = urlParser.parse(url);
     params.rejectUnauthorized = false;
@@ -36,7 +37,7 @@ module.exports = function (customUpload, manifest, manifestUrl) {
   return fetchCloudManifest(manifestUrl).then(
     (cManifest) => {
       const resources = Object.keys(manifest).filter((k) => !cManifest[k]).map((k) => manifest[k]);
-      if(resources.length > 1){
+      if (resources.length > 1) {
         // 如果存在变更的资源文件，则需要进行manifest更新, 否则不产生任何更新
         resources.push(manifest['manifest.json']);
       }
