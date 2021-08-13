@@ -96,10 +96,6 @@ class CloudImagePlugin {
    */
   processAssets = (assets) => {
     const manifest = this.manifest;
-    const asset = this.getManifestAsset();
-    // 生成manifest.json
-    assets[asset.key] = asset.content;
-    console.log(manifest);
     // 控制云端资源输出 目录
     Object.keys(manifest).forEach((key) => {
       const asset = assets[key];
@@ -148,7 +144,6 @@ class CloudImagePlugin {
       // 启动静态资源服务
       (new StaticAppServer()).start(this)
     }
-    const idManifestPath = path.join(compiler.options.output.path, 'manifest.json')
     // 修改compiler.publicPath为对应的serverURL
     compiler.options.output.publicPath = this.serverURL;
 
@@ -159,7 +154,7 @@ class CloudImagePlugin {
         // 每次重新构建，需要清空manifest
         this.manifest = this.getCachedManifest();
         // 将清单作为文件
-        this.addManifest('manifest.json', idManifestPath)
+        this.addManifest('manifest.json', this.getCachePath())
         // 生成需要上传云端的资源
         if (compilation.hooks.processAssets) {
           compilation.hooks.processAssets.tap('CloudImagePlugin', this.processAssets)
