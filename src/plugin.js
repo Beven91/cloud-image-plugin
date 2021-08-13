@@ -14,8 +14,8 @@ class CloudImagePlugin {
   /**
    * 获取当前缓存的manifest数据
    */
-  static addManifest(hashId) {
-    runtime.instance.addManifest(hashId);
+  static addManifest() {
+    runtime.instance.addManifest.call(runtime.instance, arguments);
   }
 
   /**
