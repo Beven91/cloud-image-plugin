@@ -32,6 +32,8 @@ const CloudImagePlugin = require('cloud-image-plugin');
 module.exports = {
   plugins:[
     new CloudImagePlugin({ 
+      // 运行模式: remote 模式会实时上传，local 仅使用本地静态资源服务 默认为 remote
+      mode:'remote', 
       // 需要上传的云端访问地址
       publicPath: 'https://oss.com/my-app',
       // 自定义上传函数

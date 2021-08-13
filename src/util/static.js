@@ -1,20 +1,20 @@
 const http = require('http')
-const path = require('path')
+const fs = require('fs');
 
 class StaticAppServer {
 
   server = null
 
-  start(port, compiler) {
+  start(pluginInstance) {
     this.server = http
       .createServer((req, resp) => {
         try {
-          this.handleRequest(req, resp, compiler)
+          this.handleRequest(req, resp, pluginInstance)
         } catch (ex) {
           console.error(ex)
         }
       })
-      .listen(port, () => {
+      .listen(pluginInstance.options.port, () => {
         console.log('静态服务已启动.......')
       });
     process.on('beforeExit', () => {
@@ -23,10 +23,10 @@ class StaticAppServer {
     })
   }
 
-  handleRequest(req, resp, compiler) {
+  handleRequest(req, resp, pluginInstance) {
     const url = req.url.split('?').shift();
     const id = url.replace(/^\//, '')
-    const file = path.join(compiler.options.output.path, this.baseDir, id);
+    const file = (pluginInstance.manifest[id] || {}).file;
     if (!fs.existsSync(file)) {
       resp.writeHead(404)
       resp.end()

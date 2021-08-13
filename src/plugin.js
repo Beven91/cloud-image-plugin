@@ -28,6 +28,8 @@ class CloudImagePlugin {
     port: 9016,
     // 需要上传的云端访问地址
     publicPath: '',
+    // 运行模式： local | remote
+    mode: 'remote',
     // 自定义上传函数
     uploadToCloud: (resources, manifest, cloudManifest) => 1,
   }
@@ -40,7 +42,7 @@ class CloudImagePlugin {
     this.manifest = {};
     this.emitCount = 0;
     this.options = Object.assign({}, this.options, options || {});
-    this.serverURL = process.env.NODE_ENV !== 'production' ? 'http://localhost:' + this.options.port + '/' : options.publicPath;
+    this.serverURL = options.mode === 'local' ? 'http://localhost:' + this.options.port + '/' : options.publicPath;
     runtime.instance = this;
   }
 
@@ -49,7 +51,7 @@ class CloudImagePlugin {
    * @returns 
    */
   getPath(id) {
-    return this.baseDir + ' /' + id;
+    return this.baseDir + '/' + id;
   }
 
   /**
@@ -125,8 +127,10 @@ class CloudImagePlugin {
   apply(compiler) {
     // 设置编译器
     this.compiler = compiler;
-    // 启动静态资源服务
-    (new StaticAppServer()).start(this.options.port, compiler)
+    if (this.options.mode === 'local') {
+      // 启动静态资源服务
+      (new StaticAppServer()).start(this)
+    }
     // 修改compiler.publicPath为对应的serverURL
     compiler.options.output.publicPath = this.serverURL;
 
@@ -148,6 +152,10 @@ class CloudImagePlugin {
       if (!compilation.hooks.processAssets) {
         // 如果不支持processAssets
         this.processAssets(compilation.assets);
+      }
+      if (this.options.mode === 'local') {
+        // 本地模式，不上传内容
+        return;
       }
       // this.emitCount = this.emitCount + 1;
       // if (this.emitCount == 1) {
