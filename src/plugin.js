@@ -2,6 +2,7 @@
 const path = require('path');
 const upload = require('./util/uploader');
 const StaticAppServer = require('./util/static');
+const urlParser = require('url');
 
 const runtime = {
   instance: null
@@ -59,8 +60,11 @@ class CloudImagePlugin {
    */
   addManifest(id) {
     const manifest = this.manifest;
+    const meta = urlParser.parse(this.options.publicPath || '')
     manifest[id] = {
-      file: path.join(this.compiler.options.output.path, this.getPath(id))
+      file: path.join(this.compiler.options.output.path, this.getPath(id)),
+      name: id,
+      path: (meta.path + '/' + id).replace(/^\//, ''),
     }
   }
 
@@ -140,6 +144,8 @@ class CloudImagePlugin {
         this.compilation = compilation;
         // 每次重新构建，需要清空manifest
         this.manifest = {};
+        // 将清单作为文件
+        this.addManifest('manifest.json')
         // 生成需要上传云端的资源
         if (compilation.hooks.processAssets) {
           compilation.hooks.processAssets.tap('CloudImagePlugin', this.processAssets)

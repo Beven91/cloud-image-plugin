@@ -1,6 +1,6 @@
 const http = require('http');
 const https = require('https');
-
+const urlParser = require('url')
 
 /**
  * 获取云端的manfiest.json
@@ -8,8 +8,10 @@ const https = require('https');
 function fetchCloudManifest(url) {
   return new Promise((resolve, reject) => {
     const agent = /^https:/.test(url) ? https : http;
-    agent.get(url, (res) => {
-      if(res.statusCode == 404){
+    const params = urlParser.parse(url);
+    params.rejectUnauthorized = false;
+    agent.get(params, (res) => {
+      if (res.statusCode == 404) {
         return resolve({})
       }
       if (res.statusCode !== 200) {
@@ -34,6 +36,10 @@ module.exports = function (customUpload, manifest, manifestUrl) {
   return fetchCloudManifest(manifestUrl).then(
     (cManifest) => {
       const resources = Object.keys(manifest).filter((k) => !cManifest[k]).map((k) => manifest[k]);
+      if(resources.length > 1){
+        // 如果存在变更的资源文件，则需要进行manifest更新, 否则不产生任何更新
+        resources.push(manifest['manifest.json']);
+      }
       // 2. 调用自定义上传，将发生改变的资源上传至云端
       return Promise.resolve(customUpload(resources, manifest, cManifest));
     }

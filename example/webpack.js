@@ -27,7 +27,9 @@ module.exports = {
     publicPath: publicPath,
   },
   plugins: [
-    new CloudImagePlugin(),
+    new CloudImagePlugin({
+      publicPath: '',
+    }),
     new webpack.ProgressPlugin(),
   ],
   module: {
@@ -52,10 +54,6 @@ module.exports = {
           },
         ],
       },
-      // {
-      //   test:/\.json$/,
-      //   loader:'json-loader'
-      // },
       {
         // url类型模块资源访问
         test: new RegExp(`\\.(${[
@@ -67,15 +65,8 @@ module.exports = {
           'woff', 'woff2', 'woff', 'woff2', 'eot', 'ttf', // icon font
           'svg',
         ].join('|')})$`),
-        use:[
+        use: [
           CloudImagePlugin.loader,
-          // {
-          //   loader: 'url-loader',
-          //   options: {
-          //     name: `../cloud-assets/[hash].[ext]`,
-          //     limit: 10000,
-          //   },
-          // }
         ],
       },
     ]
