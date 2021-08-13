@@ -44,7 +44,7 @@ class CloudImagePlugin {
     this.manifest = {};
     this.emitCount = 0;
     this.options = Object.assign({}, this.options, options || {});
-    this.serverURL = options.mode === 'local' ? 'http://localhost:' + this.options.port + '/' : (options.publicPath + '/').replace('//', '/')
+    this.serverURL = options.mode === 'local' ? 'http://localhost:' + this.options.port + '/' : (options.publicPath + '/').replace(/\/\/$/, '/')
     runtime.instance = this;
   }
 
