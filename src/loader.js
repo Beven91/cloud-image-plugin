@@ -6,6 +6,7 @@ module.exports = function (content) {
     ...this,
     query: {
       limit: false,
+      esModule:false,
       name: '[hash].[ext]'
     }
   }
