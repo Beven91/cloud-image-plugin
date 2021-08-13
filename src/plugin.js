@@ -15,7 +15,7 @@ class CloudImagePlugin {
    * 获取当前缓存的manifest数据
    */
   static addManifest() {
-    runtime.instance.addManifest.call(runtime.instance, arguments);
+    runtime.instance.addManifest.apply(runtime.instance, arguments);
   }
 
   /**
@@ -109,11 +109,11 @@ class CloudImagePlugin {
   getCachePath() {
     const nmRoot = path.resolve('node_modules');
     const root = fs.existsSync(nmRoot) ? nmRoot : path.join(__dirname, '..');
-    const cacheRoot = path.join(root, '.cache');
+    const cacheRoot = path.join(root, '.@cloud');
     if (!fs.existsSync(cacheRoot)) {
       fs.mkdirSync(cacheRoot)
     }
-    return path.join(cacheRoot, '@cloud-manifest.json');
+    return path.join(cacheRoot, 'manifest.json');
   }
 
   /**

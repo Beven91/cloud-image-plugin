@@ -1,3 +1,4 @@
+import './index.css'
 import React  from 'react';
 import a from './images/a.jpg'
 import b from './images/b.jpeg'

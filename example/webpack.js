@@ -1,6 +1,7 @@
 const webpack = require('webpack')
 const path = require('path')
 const CloudImagePlugin = require('../index')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 const releaseDir = path.resolve('dist')
 const isProduction = false;
@@ -27,6 +28,7 @@ module.exports = {
     publicPath: publicPath,
   },
   plugins: [
+    new MiniCssExtractPlugin({  }),
     new CloudImagePlugin({
       publicPath: '',
       uploadToCloud:(resources)=>{
@@ -55,6 +57,13 @@ module.exports = {
               ]
             },
           },
+        ],
+      },
+      {
+        test: /\.(css|scss)$/i,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
         ],
       },
       {
