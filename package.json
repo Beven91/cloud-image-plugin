@@ -1,0 +1,41 @@
+{
+  "name": "cloud-image-plugin",
+  "version": "1.0.3",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Beven91/cloud-image-plugin.git"
+  },
+  "keywords": [
+    "webpack",
+    "image-loader",
+    "image"
+  ],
+  "author": "Beven",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Beven91/cloud-image-plugin/issues"
+  },
+  "homepage": "https://github.com/Beven91/cloud-image-plugin#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.12.1",
+    "@babel/core": "^7.12.3",
+    "@babel/plugin-proposal-decorators": "^7.12.1",
+    "@babel/runtime": "^7.12.5",
+    "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
+    "babel-loader": "^8.2.1",
+    "json-loader": "^0.5.7",
+    "metro-react-native-babel-preset": "^0.64.0",
+    "react": "^17.0.2",
+    "webpack": "^5.50.0",
+    "webpack-cli": "^4.2.0"
+  },
+  "dependencies": {
+    "file-loader": "^6.2.0",
+    "url-loader": "^4.1.1"
+  }
+}
