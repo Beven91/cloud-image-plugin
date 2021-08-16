@@ -32,6 +32,7 @@ module.exports = {
       publicPath: 'https://oss.com/my-app',
       // 自定义上传函数
       uploadToCloud: (resources, manifest, cloudManifest) => {
+        // 注意: resources数组为：和云端manifest.json对比hash后计算出需要上传的资源列表
         oss.batchUpload(resources)
       },
     })
@@ -76,6 +77,9 @@ module.exports = {
 module.exports = {
   mini: {
     webpackChain: (chain)=>{
+       // 移除默认的图片处理loader 下文中会使用cloud-image-plugin来处理
+      chain.module.rules.delete('image');
+      // 配置cloud处理
       chain.merge({
         plugin: {
           'cloud': {
@@ -83,16 +87,17 @@ module.exports = {
             args: [
               {
                 // 需要上传的云端访问地址
-                publicPath: getPublicPath(),
+                publicPath: 'https://oss.com/my-app',
                 // 自定义上传函数
                 uploadToCloud: (resources, manifest, cloudManifest) => {
+                  // 注意: resources数组为：和云端manifest.json对比hash后计算出需要上传的资源列表
                   return Promise.all(
                     resources.map((item) => {
-                      // 这里自定义上传到云端
+                      // 文件相对于publicPath的路径名
                       const name = item.path;
                       // 要上传文件的本地绝对路径
                       const absPath = item.file;
-                      // 实现上传
+                      // 这里可以自定义实现将文件上传至云端
                     })
                   )
                 }
