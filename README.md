@@ -40,10 +40,78 @@ module.exports = {
     rules:[
       {
         // url类型模块资源访问
-        test: /\.(png|jpeg|gif)/,
+        test: /\.(png|jpeg|gif|ttf|woff|woff2)/,
         loader: CloudImagePlugin.loader,
       },
     ]
   }
 }
+```
+
+### Taro使用
+
+#### 第一步
+
+修改 `config/index` 中 `postcss.url`的url模式为:`copy`
+
+```js
+module.exports = {
+  mini: {
+    postcss: {
+      url: {
+        config: {
+          url:'copy',
+        }
+      },
+    }
+  },
+}
+```
+
+#### 第二步
+
+通过`webpackChain`添加插件
+
+```js
+module.exports = {
+  mini: {
+    webpackChain: (chain)=>{
+      chain.merge({
+        plugin: {
+          'cloud': {
+            plugin: CloudImagePlugin,
+            args: [
+              {
+                // 需要上传的云端访问地址
+                publicPath: getPublicPath(),
+                // 自定义上传函数
+                uploadToCloud: (resources, manifest, cloudManifest) => {
+                  return Promise.all(
+                    resources.map((item) => {
+                      // 这里自定义上传到云端
+                      const name = item.path;
+                      // 要上传文件的本地绝对路径
+                      const absPath = item.file;
+                      // 实现上传
+                    })
+                  )
+                }
+              }
+            ]
+          }
+        },
+        module: {
+          rule: {
+            // 定义cloud的loader
+            cloud: {
+              test: /\.(png|jpeg|jpg|gif|ttf|woff|woff2)/,
+              loader: CloudImagePlugin.loader
+            },
+          }
+        }
+      })
+    }
+  },
+}
+
 ```
