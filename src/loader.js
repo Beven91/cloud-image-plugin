@@ -21,8 +21,9 @@ module.exports = function (content) {
   }
   const result = urlLoader.call(loaderContext, content)
   const md = this._module;
+  const file = md.resource.split('?').shift();
   const id = getHashId(md,result);
-  Plugin.addManifest(id, md.resource);
+  Plugin.addManifest(id, file);
   return result;
 }
 
