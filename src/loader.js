@@ -1,6 +1,15 @@
 const Plugin = require('./plugin')
 const urlLoader = require('url-loader')
 
+const getHashId = (md,result)=>{
+  const assets = md.buildInfo.assets || {};
+  const keys = Object.keys(assets)
+  if(keys.length > 0){
+    return keys[0];
+  }
+  return result.replace(/\s/g,'').split('+"').pop().replace('";','')
+}
+
 module.exports = function (content) {
   const loaderContext = {
     ...this,
@@ -12,9 +21,7 @@ module.exports = function (content) {
   }
   const result = urlLoader.call(loaderContext, content)
   const md = this._module;
-  const assets = md.buildInfo.assets || {};
-  const keys = Object.keys(assets)
-  const id = keys[0];
+  const id = getHashId(md,result);
   Plugin.addManifest(id, md.resource);
   return result;
 }
