@@ -79,6 +79,8 @@ module.exports = {
     webpackChain: (chain)=>{
        // 移除默认的图片处理loader 下文中会使用cloud-image-plugin来处理
       chain.module.rules.delete('image');
+      chain.module.rules.delete('font');
+
       // 配置cloud处理
       chain.merge({
         plugin: {
